@@ -7,10 +7,11 @@ public class GameController : MonoBehaviour
     public Button[] buttons = new Button[9];
 
     private GridValue nextMove;
-    private int[,] grid = { { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
+    private int[,] grid = new int[3,3];
 
     public BoardManager boardMgr;
     public UIManager uiMgr;
+    private AIManager aiMgr;
 
     void Start()
     {
@@ -19,6 +20,21 @@ public class GameController : MonoBehaviour
             int id = i;
             buttons[i].onClick.AddListener(() => PlayerMove(id));
         }
+
+        InitGame();
+    }
+
+    private void InitGame()
+    {
+        for (var i = 0; i < 3; i++)
+        {
+            for (var j = 0; j < 3; j++)
+                grid[i, j] = 0;
+        }
+
+        aiMgr = new AIManager();
+        AIStrategy strategy = new SimpleStrategy();
+        aiMgr.SetStrategy(strategy);
 
         boardMgr.ResetBoard();
         gameEnd = false;
@@ -41,16 +57,8 @@ public class GameController : MonoBehaviour
 
     private void AIMove()
     {
-        int index = UnityEngine.Random.Range(0, buttons.Length);
-        Cell cell = buttons[index].GetComponent<Cell>();
-        // while ‘Ï≥…ø®À¿
-        /*
-        while (!cell.isSet)
-        {
-            index = Random.Range(0, buttons.Length);
-        }
-        */
-        PlaceMark(index);
+        (int, int) targetCell = aiMgr.GetNextMove(grid);
+        PlaceMark(targetCell.Item1 * 3 + targetCell.Item2);
     }
 
     private void PlaceMark(int index)
@@ -79,9 +87,9 @@ public class GameController : MonoBehaviour
             if (grid[i, 0] == grid[i, 1] && grid[i, 1] == grid[i, 2] && grid[i, 0] != 0)
             {
                 if (grid[i, 0] == 1)
-                    uiMgr.SetResultText(RoundResult.PlayerWin);
+                    uiMgr.SetResultUI(RoundResult.PlayerWin);
                 else
-                    uiMgr.SetResultText(RoundResult.PlayerLost);
+                    uiMgr.SetResultUI(RoundResult.PlayerLost);
                 EndRound();
                 return;
             }
@@ -92,9 +100,9 @@ public class GameController : MonoBehaviour
             if (grid[0, i] == grid[1, i] && grid[1, i] == grid[2, i] && grid[0, i] != 0)
             {
                 if (grid[0, i] == 1)
-                    uiMgr.SetResultText(RoundResult.PlayerWin);
+                    uiMgr.SetResultUI(RoundResult.PlayerWin);
                 else
-                    uiMgr.SetResultText(RoundResult.PlayerLost);
+                    uiMgr.SetResultUI(RoundResult.PlayerLost);
                 EndRound();
                 return;
             }
@@ -103,18 +111,18 @@ public class GameController : MonoBehaviour
         if (grid[0, 0] == grid[1, 1] && grid[1, 1] == grid[2, 2] && grid[0, 0] != 0)
         {
             if (grid[0, 0] == 1)
-                uiMgr.SetResultText(RoundResult.PlayerWin);
+                uiMgr.SetResultUI(RoundResult.PlayerWin);
             else
-                uiMgr.SetResultText(RoundResult.PlayerLost);
+                uiMgr.SetResultUI(RoundResult.PlayerLost);
             EndRound();
             return;
         }
         if (grid[0, 2] == grid[1, 1] && grid[1, 1] == grid[2, 0] && grid[0, 2] != 0)
         {
             if (grid[0, 2] == 1)
-                uiMgr.SetResultText(RoundResult.PlayerWin);
+                uiMgr.SetResultUI(RoundResult.PlayerWin);
             else
-                uiMgr.SetResultText(RoundResult.PlayerLost);
+                uiMgr.SetResultUI(RoundResult.PlayerLost);
             EndRound();
             return;
         }
@@ -129,7 +137,7 @@ public class GameController : MonoBehaviour
         }
         if (draw)
         {
-            uiMgr.SetResultText(RoundResult.Draw);
+            uiMgr.SetResultUI(RoundResult.Draw);
             EndRound();
         }
     }
@@ -139,5 +147,12 @@ public class GameController : MonoBehaviour
         Debug.Log("EndRound");
         boardMgr.DisableButtons();
         gameEnd = true;
+    }
+
+    public void Restart()
+    {
+        gameEnd = false;
+        uiMgr.ResetResultUI();
+        InitGame();
     }
 }

@@ -6,20 +6,25 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public Text resultText;
+    public Button replayBtn;
+
+    public GameController gameController;
 
     private void Start()
     {
-        ResetText();
+        ResetResultUI();
     }
 
-    public void ResetText()
+    public void ResetResultUI()
     {
         resultText.text = "";
+        replayBtn.gameObject.SetActive(false);
     }
 
-    public void SetResultText(RoundResult result)
+    public void SetResultUI(RoundResult result)
     {
-        switch(result)
+        ShowButtons();
+        switch (result)
         {
             case RoundResult.PlayerWin:
                 resultText.text = "You Won!";
@@ -31,5 +36,15 @@ public class UIManager : MonoBehaviour
                 resultText.text = "It's a Draw!";
                 break;
         }
+    }
+
+    public void ShowButtons()
+    {
+        replayBtn.gameObject.SetActive(true);
+    }
+
+    public void ReplayButtonOnClicked()
+    {
+        gameController.Restart();
     }
 }
