@@ -67,6 +67,7 @@ public class UIManager : MonoBehaviour
 
     public void ResetScores()
     {
+        roundNoText.text = "1";
         xScoreText.text = "0";
         drawTimeText.text = "0";
         oScoreText.text = "0";
