@@ -35,7 +35,7 @@ public class SimpleStrategy : AIStrategy
         // 如果中心为空,返回中心
         if (board[1, 1] == 0)
             return (1, 1);
-        // 找到权重最大的空格进行落子
+        // 找到权重最大的空格
         int bestWeight = -1000;
         (int, int) bestMove = (-1, -1);
         for (int i = 0; i < 3; i++)
@@ -53,55 +53,41 @@ public class SimpleStrategy : AIStrategy
     }
 }
 
-/*
+
 // 极大极小算法 
 public class MinimaxStrategy : AIStrategy
 {
-
-    private const int AI = 1;
-    private const int OPPONENT = -1;
-
-    private int depthLimit = 5;
+    private const int MAX = 1;
+    private const int MIN = -1;
+    private int depthLimit = 10;
 
     public (int, int) GetNextMove(int[,] board)
     {
-
-        int bestScore = -1000;
-        (int, int) bestMove = (-1, -1);
-
-        bestMove = minimax(board, depthLimit, true);
-
-        return bestMove;
-
+        return MiniMax(board, depthLimit, true);
     }
 
-    private (int, int) minimax(int[,] board, int depth, bool isMaximizing)
+    private (int, int) MiniMax(int[,] board, int depth, bool isMax)
     {
-
-        if (GameEnded(board))
-        {
+        if (IsTerminal(board))
             return Evaluate(board);
-        }
 
         if (depth == 0)
-        {
             return Evaluate(board);
-        }
 
-        if (isMaximizing)
+        if (isMax)
         {
-            int bestScore = -1000;
+            int bestScore = int.MinValue;
+            (int, int) bestMove = (-1, -1);
 
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    if (board[i, j] == empty)
+                    if (board[i, j] == 0)
                     {
-                        board[i, j] = AI;
-                        int score = minimax(board, depth - 1, false);
-                        board[i, j] = empty;
-
+                        board[i, j] = MAX;
+                        int score = MiniMax(board, depth - 1, false).Item1;
+                        board[i, j] = 0;
                         if (score > bestScore)
                         {
                             bestScore = score;
@@ -110,22 +96,22 @@ public class MinimaxStrategy : AIStrategy
                     }
                 }
             }
-            return bestScore;
+            return bestMove;
         }
         else
         {
-            int bestScore = 1000;
+            int bestScore = int.MaxValue;
+            (int, int) bestMove = (-1, -1);
 
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    if (board[i, j] == empty)
+                    if (board[i, j] == 0)
                     {
-                        board[i, j] = OPPONENT;
-                        int score = minimax(board, depth - 1, true);
-                        board[i, j] = empty;
-
+                        board[i, j] = MIN;
+                        int score = MiniMax(board, depth - 1, true).Item1;
+                        board[i, j] = 0;
                         if (score < bestScore)
                         {
                             bestScore = score;
@@ -134,25 +120,73 @@ public class MinimaxStrategy : AIStrategy
                     }
                 }
             }
-            return bestScore;
+            return bestMove;
         }
-
     }
 
-    private int Evaluate(int[,] board)
+    private bool IsTerminal(int[,] board)
     {
-        if (AIWin(board)) return 10000;
-        if (OpponentWin(board)) return -10000;
-        return 0;
+        return HasXWon(board) || HasOWon(board) || IsDraw(board);
     }
 
-    private bool GameEnded(Chessboard board)
+    private (int, int) Evaluate(int[,] board)
     {
-        return AIWin(board) || OpponentWin(board) || BoardFull(board);
+        if (HasXWon(board)) return (+1, 0);
+        if (HasOWon(board)) return (-1, 0);
+        return (0, 0);
     }
 
+    private bool HasXWon(int[,] board)
+    {
+        // 检查横线
+        for (int i = 0; i < 3; i++)
+        {
+            if (board[i, 0] == MAX && board[i, 1] == MAX && board[i, 2] == MAX) return true;
+        }
+        // 检查竖线
+        for (int j = 0; j < 3; j++)
+        {
+            if (board[0, j] == MAX && board[1, j] == MAX && board[2, j] == MAX) return true;
+        }
+        // 检查对角线
+        if (board[0, 0] == MAX && board[1, 1] == MAX && board[2, 2] == MAX) return true;
+        if (board[0, 2] == MAX && board[1, 1] == MAX && board[2, 0] == MAX) return true;
+        return false;
+    }
+
+    private bool HasOWon(int[,] board)
+    {
+        // 检查横线
+        for (int i = 0; i < 3; i++)
+        {
+            if (board[i, 0] == MIN && board[i, 1] == MIN && board[i, 2] == MIN) return true;
+        }
+        // 检查竖线
+        for (int j = 0; j < 3; j++)
+        {
+            if (board[0, j] == MIN && board[1, j] == MIN && board[2, j] == MIN) return true;
+        }
+        // 检查对角线
+        if (board[0, 0] == MIN && board[1, 1] == MIN && board[2, 2] == MIN) return true;
+        if (board[0, 2] == MIN && board[1, 1] == MIN && board[2, 0] == MIN) return true;
+        return false;
+    }
+
+    private bool IsDraw(int[,] board)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (board[i, j] == 0)
+                    return false;
+            }
+        }
+        return true; // 棋盘满了则为平局
+    }
 }
 
+/*
 // 蒙特卡罗树搜索算法
 public class MCTSStrategy : AIStrategy
 {
@@ -161,12 +195,10 @@ public class MCTSStrategy : AIStrategy
     {
         // 蒙特卡罗树搜索实现
     }
-
 }
-
 */
 
-public class AIManager : MonoBehaviour
+public class AIManager
 {
     private AIStrategy strategy;
 

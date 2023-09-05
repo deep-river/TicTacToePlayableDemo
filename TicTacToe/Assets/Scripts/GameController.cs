@@ -33,8 +33,9 @@ public class GameController : MonoBehaviour
         }
 
         aiMgr = new AIManager();
-        AIStrategy strategy = new SimpleStrategy();
-        aiMgr.SetStrategy(strategy);
+        AIStrategy simpleStrategy = new SimpleStrategy();
+        AIStrategy minimaxStrategy = new MinimaxStrategy();
+        aiMgr.SetStrategy(minimaxStrategy);
 
         boardMgr.ResetBoard();
         gameEnd = false;
