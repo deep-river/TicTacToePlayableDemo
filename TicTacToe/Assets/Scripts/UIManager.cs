@@ -6,9 +6,12 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     public Text resultText;
-    public Button replayBtn;
+    public GameObject retryScreen;
 
     public GameController gameController;
+    public Text retryText;
+    public Button replayEasyBtn;
+    public Button replayMediumBtn;
 
     private void Start()
     {
@@ -17,13 +20,14 @@ public class UIManager : MonoBehaviour
 
     public void ResetResultUI()
     {
+        retryScreen.SetActive(false);
         resultText.text = "";
-        replayBtn.gameObject.SetActive(false);
+        retryText.gameObject.SetActive(false);
     }
 
     public void SetResultUI(RoundResult result)
     {
-        ShowButtons();
+        ShowRetryScreen();
         switch (result)
         {
             case RoundResult.PlayerWin:
@@ -38,13 +42,24 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ShowButtons()
+    public void ShowRetryScreen()
     {
-        replayBtn.gameObject.SetActive(true);
+        retryScreen.SetActive(true);
+        retryText.gameObject.SetActive(true);
     }
 
-    public void ReplayButtonOnClicked()
+    public void ShowInitScreen()
     {
-        gameController.Restart();
+        retryScreen.SetActive(true);
+    }
+
+    public void EasyModeBtnOnClicked()
+    {
+        gameController.Restart(GameMode.Easy);
+    }
+
+    public void MediumModeBtnOnClicked()
+    {
+        gameController.Restart(GameMode.Medium);
     }
 }

@@ -4,7 +4,6 @@ using UnityEngine.UI;
 public class GameController : MonoBehaviour
 {
     private bool gameEnd = true;
-    public Button[] buttons = new Button[9];
 
     private GridValue nextMove;
     private int[,] grid = new int[3,3];
@@ -15,16 +14,11 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
-        for (var i = 0; i < buttons.Length; i++)
-        {
-            int id = i;
-            buttons[i].onClick.AddListener(() => PlayerMove(id));
-        }
-
-        InitGame();
+        boardMgr.BindGridClickEvent();
+        uiMgr.ShowInitScreen();
     }
 
-    private void InitGame()
+    public void InitGame(GameMode mode)
     {
         for (var i = 0; i < 3; i++)
         {
@@ -35,7 +29,10 @@ public class GameController : MonoBehaviour
         aiMgr = new AIManager();
         AIStrategy simpleStrategy = new SimpleStrategy();
         AIStrategy minimaxStrategy = new MinimaxStrategy();
-        aiMgr.SetStrategy(minimaxStrategy);
+        if (mode == GameMode.Easy)
+            aiMgr.SetStrategy(simpleStrategy);
+        else
+            aiMgr.SetStrategy(minimaxStrategy);
 
         boardMgr.ResetBoard();
         gameEnd = false;
@@ -64,18 +61,13 @@ public class GameController : MonoBehaviour
 
     private void PlaceMark(int index)
     {
-        if (buttons[index].interactable)
+        if (boardMgr.PlaceMark(index, nextMove))
         {
-            buttons[index].interactable = false;
-
             grid[index / 3, index % 3] = (int)nextMove;
-
-            buttons[index].GetComponent<Cell>().SetValue(nextMove);
             if (nextMove == GridValue.X)
                 nextMove = GridValue.O;
             else
                 nextMove = GridValue.X;
-
             CheckWinner();
         }
     }
@@ -150,10 +142,10 @@ public class GameController : MonoBehaviour
         gameEnd = true;
     }
 
-    public void Restart()
+    public void Restart(GameMode mode)
     {
         gameEnd = false;
         uiMgr.ResetResultUI();
-        InitGame();
+        InitGame(mode);
     }
 }

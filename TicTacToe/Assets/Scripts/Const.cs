@@ -1,4 +1,9 @@
-﻿
+﻿public enum GameMode
+{
+    Easy = 0,
+    Medium = 1
+}
+
 public enum GridValue
 {
     Empty = 0,
