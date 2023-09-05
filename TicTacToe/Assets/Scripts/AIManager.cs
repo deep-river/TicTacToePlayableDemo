@@ -59,7 +59,7 @@ public class MinimaxStrategy : AIStrategy
 {
     private const int MAX = 1;
     private const int MIN = -1;
-    private int depthLimit = 10;
+    private int depthLimit = 3;
 
     public (int, int) GetNextMove(int[,] board)
     {
@@ -131,8 +131,8 @@ public class MinimaxStrategy : AIStrategy
 
     private (int, int) Evaluate(int[,] board)
     {
-        if (HasXWon(board)) return (+1, 0);
-        if (HasOWon(board)) return (-1, 0);
+        if (HasXWon(board)) return (+1, 0); // +1 for player win
+        if (HasOWon(board)) return (-1, 0); // -1 for ai win
         return (0, 0);
     }
 
