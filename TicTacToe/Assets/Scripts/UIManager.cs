@@ -13,11 +13,6 @@ public class UIManager : MonoBehaviour
     public Button replayEasyBtn;
     public Button replayMediumBtn;
 
-    private void Start()
-    {
-        ResetResultUI();
-    }
-
     public void ResetResultUI()
     {
         retryScreen.SetActive(false);
@@ -44,12 +39,14 @@ public class UIManager : MonoBehaviour
 
     public void ShowRetryScreen()
     {
+        retryText.text = "Try Again?";
         retryScreen.SetActive(true);
         retryText.gameObject.SetActive(true);
     }
 
     public void ShowInitScreen()
     {
+        retryText.text = "Select Mode";
         retryScreen.SetActive(true);
     }
 
@@ -61,5 +58,10 @@ public class UIManager : MonoBehaviour
     public void MediumModeBtnOnClicked()
     {
         gameController.Restart(GameMode.Medium);
+    }
+
+    public void ExitGame()
+    {
+        Application.Quit();
     }
 }
