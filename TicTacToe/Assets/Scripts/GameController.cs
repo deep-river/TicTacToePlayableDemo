@@ -24,12 +24,12 @@ public class GameController : MonoBehaviour
     {
         InitGrid();
         aiMgr = new AIManager();
-        AIStrategy simpleStrategy = new SimpleStrategy();
-        AIStrategy minimaxStrategy = new MinimaxStrategy();
         if (mode == GameMode.Easy)
-            aiMgr.SetStrategy(simpleStrategy);
-        else
-            aiMgr.SetStrategy(minimaxStrategy);
+            aiMgr.SetStrategy(new MinimaxStrategy(3));
+        if (mode == GameMode.Medium)
+            aiMgr.SetStrategy(new MinimaxStrategy(5));
+        if (mode == GameMode.Hard)
+            aiMgr.SetStrategy(new MinimaxStrategy(9));
 
         roundCounter += 1;
         boardMgr.ResetBoard();
@@ -63,6 +63,7 @@ public class GameController : MonoBehaviour
     private void AIMove()
     {
         (int, int) targetCell = aiMgr.GetNextMove(grid);
+        Debug.Log("AIMove: " + targetCell);
         PlaceMark(targetCell.Item1 * 3 + targetCell.Item2);
     }
 
@@ -161,6 +162,7 @@ public class GameController : MonoBehaviour
 
     private IEnumerator WaitAndStartNewRound(float waitTime)
     {
+        gameEnd = true;
         boardMgr.DisableButtons();
         yield return new WaitForSeconds(waitTime);
         uiMgr.HideResultText();

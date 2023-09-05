@@ -59,12 +59,15 @@ public class MinimaxStrategy : AIStrategy
 {
     private const int MAX = (int)GridValue.X;
     private const int MIN = (int)GridValue.O;
-    private int depthLimit = 9;
+    private int depthLimit;
+
+    public MinimaxStrategy(int depth)
+    {
+        depthLimit = depth;
+    }
 
     public (int, int) GetNextMove(int[,] board)
     {
-        return MiniMax(board, depthLimit, true);
-        /*
         (int, int) bestMove = (-1, -1);
         int minVal = 10;
         for (int i = 0; i < 3; i++)
@@ -74,14 +77,20 @@ public class MinimaxStrategy : AIStrategy
                 if (board[i, j] == 0)
                 {
                     board[i, j] = 2;
-                    int movaVal = 
+                    int moveVal = MiniMax(board, depthLimit, true);
+                    board[i, j] = 0;
+                    if (moveVal < minVal)
+                    {
+                        minVal = moveVal;
+                        bestMove = (i, j);
+                    }
                 }
             }
         }
-        */
+        return bestMove;
     }
 
-    private (int, int) MiniMax(int[,] board, int depth, bool isMax)
+    private int MiniMax(int[,] board, int depth, bool isMax)
     {
         if (IsTerminal(board) || depth == 0)
             return Evaluate(board);
@@ -89,7 +98,6 @@ public class MinimaxStrategy : AIStrategy
         if (isMax)
         {
             int bestScore = int.MinValue;
-            (int, int) bestMove = (-1, -1);
 
             for (int i = 0; i < 3; i++)
             {
@@ -98,22 +106,20 @@ public class MinimaxStrategy : AIStrategy
                     if (board[i, j] == 0)
                     {
                         board[i, j] = MAX;
-                        int score = MiniMax(board, depth - 1, false).Item1;
+                        int score = MiniMax(board, depth - 1, false);
                         board[i, j] = 0;
                         if (score > bestScore)
                         {
                             bestScore = score;
-                            bestMove = (i, j);
                         }
                     }
                 }
             }
-            return bestMove;
+            return bestScore;
         }
         else
         {
             int bestScore = int.MaxValue;
-            (int, int) bestMove = (-1, -1);
 
             for (int i = 0; i < 3; i++)
             {
@@ -122,17 +128,16 @@ public class MinimaxStrategy : AIStrategy
                     if (board[i, j] == 0)
                     {
                         board[i, j] = MIN;
-                        int score = MiniMax(board, depth - 1, true).Item1;
+                        int score = MiniMax(board, depth - 1, true);
                         board[i, j] = 0;
                         if (score < bestScore)
                         {
                             bestScore = score;
-                            bestMove = (i, j);
                         }
                     }
                 }
             }
-            return bestMove;
+            return bestScore;
         }
     }
 
@@ -141,11 +146,11 @@ public class MinimaxStrategy : AIStrategy
         return HasXWon(board) || HasOWon(board) || IsDraw(board);
     }
 
-    private (int, int) Evaluate(int[,] board)
+    private int Evaluate(int[,] board)
     {
-        if (HasXWon(board)) return (+1, 0); // +1 for player win
-        if (HasOWon(board)) return (-1, 0); // -1 for ai win
-        return (0, 0); // 0 for a draw
+        if (HasXWon(board)) return +1; // +1 for player win
+        if (HasOWon(board)) return -1; // -1 for ai win
+        return 0; // 0 for a draw
     }
 
     private bool HasXWon(int[,] board)

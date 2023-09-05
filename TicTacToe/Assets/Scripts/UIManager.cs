@@ -88,7 +88,7 @@ public class UIManager : MonoBehaviour
 
     public void ShowRetryScreen()
     {
-        retryText.text = "Try Again?";
+        retryText.text = "Restart ?";
         retryScreen.SetActive(true);
         retryText.gameObject.SetActive(true);
     }
@@ -107,6 +107,11 @@ public class UIManager : MonoBehaviour
     public void MediumModeBtnOnClicked()
     {
         gameController.RestartGame(GameMode.Medium);
+    }
+
+    public void HardModeBtnOnClicked()
+    {
+        gameController.RestartGame(GameMode.Hard);
     }
 
     public void ExitGame()

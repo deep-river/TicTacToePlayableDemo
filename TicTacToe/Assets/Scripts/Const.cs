@@ -1,7 +1,8 @@
 ﻿public enum GameMode
 {
     Easy = 0,
-    Medium = 1
+    Medium = 1,
+    Hard = 2
 }
 
 public enum GridValue
