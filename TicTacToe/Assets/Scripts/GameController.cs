@@ -1,5 +1,5 @@
+using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
@@ -12,6 +12,8 @@ public class GameController : MonoBehaviour
     public UIManager uiMgr;
     private AIManager aiMgr;
 
+    private int roundCounter = 0;
+
     void Start()
     {
         boardMgr.BindGridClickEvent();
@@ -20,12 +22,7 @@ public class GameController : MonoBehaviour
 
     public void InitGame(GameMode mode)
     {
-        for (var i = 0; i < 3; i++)
-        {
-            for (var j = 0; j < 3; j++)
-                grid[i, j] = 0;
-        }
-
+        InitGrid();
         aiMgr = new AIManager();
         AIStrategy simpleStrategy = new SimpleStrategy();
         AIStrategy minimaxStrategy = new MinimaxStrategy();
@@ -34,9 +31,19 @@ public class GameController : MonoBehaviour
         else
             aiMgr.SetStrategy(minimaxStrategy);
 
+        roundCounter += 1;
         boardMgr.ResetBoard();
         gameEnd = false;
         nextMove = GridValue.X;
+    }
+
+    private void InitGrid()
+    {
+        for (var i = 0; i < 3; i++)
+        {
+            for (var j = 0; j < 3; j++)
+                grid[i, j] = 0;
+        }
     }
 
     public void PlayerMove(int index)
@@ -64,12 +71,17 @@ public class GameController : MonoBehaviour
         if (boardMgr.PlaceMark(index, nextMove))
         {
             grid[index / 3, index % 3] = (int)nextMove;
-            if (nextMove == GridValue.X)
-                nextMove = GridValue.O;
-            else
-                nextMove = GridValue.X;
+            SwitchTurn();
             CheckWinner();
         }
+    }
+
+    private void SwitchTurn()
+    {
+        if (nextMove == GridValue.X)
+            nextMove = GridValue.O;
+        else
+            nextMove = GridValue.X;
     }
 
     private void CheckWinner()
@@ -80,10 +92,10 @@ public class GameController : MonoBehaviour
             if (grid[i, 0] == grid[i, 1] && grid[i, 1] == grid[i, 2] && grid[i, 0] != 0)
             {
                 if (grid[i, 0] == 1)
-                    uiMgr.SetResultUI(RoundResult.PlayerWin);
+                    uiMgr.UpdateResultUI(RoundResult.PlayerWin);
                 else
-                    uiMgr.SetResultUI(RoundResult.PlayerLost);
-                EndRound();
+                    uiMgr.UpdateResultUI(RoundResult.PlayerLost);
+                StartNewRound(1.2f);
                 return;
             }
         }
@@ -93,10 +105,10 @@ public class GameController : MonoBehaviour
             if (grid[0, i] == grid[1, i] && grid[1, i] == grid[2, i] && grid[0, i] != 0)
             {
                 if (grid[0, i] == 1)
-                    uiMgr.SetResultUI(RoundResult.PlayerWin);
+                    uiMgr.UpdateResultUI(RoundResult.PlayerWin);
                 else
-                    uiMgr.SetResultUI(RoundResult.PlayerLost);
-                EndRound();
+                    uiMgr.UpdateResultUI(RoundResult.PlayerLost);
+                StartNewRound(1.2f);
                 return;
             }
         }
@@ -104,19 +116,19 @@ public class GameController : MonoBehaviour
         if (grid[0, 0] == grid[1, 1] && grid[1, 1] == grid[2, 2] && grid[0, 0] != 0)
         {
             if (grid[0, 0] == 1)
-                uiMgr.SetResultUI(RoundResult.PlayerWin);
+                uiMgr.UpdateResultUI(RoundResult.PlayerWin);
             else
-                uiMgr.SetResultUI(RoundResult.PlayerLost);
-            EndRound();
+                uiMgr.UpdateResultUI(RoundResult.PlayerLost);
+            StartNewRound(1.2f);
             return;
         }
         if (grid[0, 2] == grid[1, 1] && grid[1, 1] == grid[2, 0] && grid[0, 2] != 0)
         {
             if (grid[0, 2] == 1)
-                uiMgr.SetResultUI(RoundResult.PlayerWin);
+                uiMgr.UpdateResultUI(RoundResult.PlayerWin);
             else
-                uiMgr.SetResultUI(RoundResult.PlayerLost);
-            EndRound();
+                uiMgr.UpdateResultUI(RoundResult.PlayerLost);
+            StartNewRound(1.2f);
             return;
         }
         //¼ì²éÆ½¾Ö
@@ -130,22 +142,39 @@ public class GameController : MonoBehaviour
         }
         if (draw)
         {
-            uiMgr.SetResultUI(RoundResult.Draw);
-            EndRound();
+            uiMgr.UpdateResultUI(RoundResult.Draw);
+            StartNewRound(1.2f);
         }
     }
 
-    private void EndRound()
-    {
-        Debug.Log("EndRound");
-        boardMgr.DisableButtons();
-        gameEnd = true;
-    }
-
-    public void Restart(GameMode mode)
+    public void RestartGame(GameMode mode)
     {
         gameEnd = false;
         uiMgr.ResetResultUI();
         InitGame(mode);
+    }
+
+    public void StartNewRound(float waitTime)
+    {
+        StartCoroutine(WaitAndStartNewRound(waitTime));
+    }
+
+    private IEnumerator WaitAndStartNewRound(float waitTime)
+    {
+        boardMgr.DisableButtons();
+        yield return new WaitForSeconds(waitTime);
+        uiMgr.HideResultText();
+        InitGrid();
+        boardMgr.ResetBoard();
+        gameEnd = false;
+
+        roundCounter += 1;
+        if (roundCounter % 2 == 0)
+        {
+            nextMove = GridValue.O;
+            AIMove();
+        }
+        else
+            nextMove = GridValue.X;
     }
 }

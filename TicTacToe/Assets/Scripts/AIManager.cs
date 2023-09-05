@@ -57,21 +57,33 @@ public class SimpleStrategy : AIStrategy
 // 极大极小算法 
 public class MinimaxStrategy : AIStrategy
 {
-    private const int MAX = 1;
-    private const int MIN = -1;
-    private int depthLimit = 3;
+    private const int MAX = (int)GridValue.X;
+    private const int MIN = (int)GridValue.O;
+    private int depthLimit = 9;
 
     public (int, int) GetNextMove(int[,] board)
     {
         return MiniMax(board, depthLimit, true);
+        /*
+        (int, int) bestMove = (-1, -1);
+        int minVal = 10;
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                if (board[i, j] == 0)
+                {
+                    board[i, j] = 2;
+                    int movaVal = 
+                }
+            }
+        }
+        */
     }
 
     private (int, int) MiniMax(int[,] board, int depth, bool isMax)
     {
-        if (IsTerminal(board))
-            return Evaluate(board);
-
-        if (depth == 0)
+        if (IsTerminal(board) || depth == 0)
             return Evaluate(board);
 
         if (isMax)
@@ -133,7 +145,7 @@ public class MinimaxStrategy : AIStrategy
     {
         if (HasXWon(board)) return (+1, 0); // +1 for player win
         if (HasOWon(board)) return (-1, 0); // -1 for ai win
-        return (0, 0);
+        return (0, 0); // 0 for a draw
     }
 
     private bool HasXWon(int[,] board)
@@ -185,18 +197,6 @@ public class MinimaxStrategy : AIStrategy
         return true; // 棋盘满了则为平局
     }
 }
-
-/*
-// 蒙特卡罗树搜索算法
-public class MCTSStrategy : AIStrategy
-{
-
-    public (int, int) GetNextMove(int[,] board)
-    {
-        // 蒙特卡罗树搜索实现
-    }
-}
-*/
 
 public class AIManager
 {
